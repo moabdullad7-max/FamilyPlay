@@ -1,0 +1,168 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>FamilyPlay 💜</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f8f5ff;color:#30234a}
+header{background:linear-gradient(135deg,#7650d9,#b39af7);color:white;padding:28px 20px;text-align:center}
+header h1{font-size:36px;margin:0 0 8px}
+header p{margin:0}
+main{max-width:850px;margin:auto;padding:20px}
+.panel{background:white;padding:20px;border-radius:18px;margin-bottom:18px;box-shadow:0 4px 18px #30234a12}
+.filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px}
+label{font-size:14px;font-weight:bold}
+select,button{width:100%;padding:12px;border-radius:10px;border:1px solid #ded4f5;font-size:15px;margin-top:7px}
+button{background:#7650d9;color:white;border:none;font-weight:bold;cursor:pointer}
+button:hover{opacity:.88}
+.secondary{background:#eee7ff;color:#5135a0}
+.games{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px}
+.game{border:1px solid #e9e1fb;border-radius:15px;padding:16px;background:#fff}
+.game .emoji{font-size:30px}
+.game h3{margin:8px 0}
+.game p{line-height:1.5;font-size:14px}
+.game button{margin-top:5px}
+nav{display:flex;gap:10px;margin-bottom:18px}
+nav button{margin:0}
+footer{text-align:center;color:#796d90;padding:20px;font-size:13px}
+</style>
+</head>
+<body>
+<header>
+<h1>💜 FamilyPlay</h1>
+<p>Less scrolling. More playing. More family memories.</p>
+</header>
+
+<main>
+<section class="panel">
+<h2>What are we playing today?</h2>
+<p>Choose your preferences and discover a game for everyone.</p>
+<div class="filters">
+<label>Players
+<select id="players">
+<option value="2">2 players</option>
+<option value="3">3 players</option>
+<option value="4" selected>4 players</option>
+<option value="6">5–6 players</option>
+<option value="8">7+ players</option>
+</select></label>
+<label>Available time
+<select id="time">
+<option value="10">10 minutes</option>
+<option value="20" selected>20 minutes</option>
+<option value="30">30 minutes</option>
+<option value="60">60 minutes</option>
+</select></label>
+<label>Where?
+<select id="place">
+<option value="any">Anywhere</option>
+<option value="indoor">Indoors</option>
+<option value="outdoor">Outdoors</option>
+</select></label>
+<label>Materials
+<select id="materials">
+<option value="any">Anything</option>
+<option value="none">No materials</option>
+<option value="paper">Paper and pens</option>
+<option value="cards">Cards or board games</option>
+</select></label>
+</div>
+<button onclick="recommend()">Find My Family Game ✨</button>
+<button class="secondary" onclick="surprise()">Surprise Me!</button>
+</section>
+
+<nav>
+<button onclick="showGames()">🎲 All Games</button>
+<button class="secondary" onclick="showFavourites()">⭐ Favourites (<span id="favCount">0</span>)</button>
+</nav>
+
+<section class="panel">
+<h2 id="heading">Recommended for your family</h2>
+<div id="results" class="games"></div>
+</section>
+
+<section class="panel">
+<h2>Our mission 💜</h2>
+<p>FamilyPlay helps families discover enjoyable activities, spend quality time together, and create lasting memories. Recommendations are based on your choices.</p>
+<p><small>Privacy first: this demo does not need an account or collect personal details.</small></p>
+</section>
+</main>
+<footer>FamilyPlay · Bringing families closer, one game at a time.</footer>
+
+<script>
+const games=[
+{name:"Guess Who I Am?",emoji:"🕵️",min:2,time:10,place:"any",material:"none",desc:"Think of a person, animal, or object. Everyone asks yes-or-no questions to guess it."},
+{name:"Story Chain",emoji:"📚",min:2,time:10,place:"any",material:"none",desc:"Take turns adding one sentence to create a funny family story."},
+{name:"Charades",emoji:"🎭",min:3,time:20,place:"any",material:"none",desc:"Act out an animal, movie, or activity without speaking. Your team guesses!"},
+{name:"Memory Challenge",emoji:"🧠",min:2,time:10,place:"indoor",material:"none",desc:"Look around the room for 30 seconds, close your eyes, and recall as many objects as possible."},
+{name:"Family Quiz",emoji:"❓",min:2,time:20,place:"any",material:"paper",desc:"Write fun trivia questions and take turns answering them."},
+{name:"Drawing Duel",emoji:"🎨",min:2,time:20,place:"indoor",material:"paper",desc:"Draw a mystery word in one minute while everyone else tries to guess it."},
+{name:"Card Game Time",emoji:"🃏",min:2,time:30,place:"indoor",material:"cards",desc:"Choose a family-friendly card game, explain its rules, and play together."},
+{name:"Treasure Hunt",emoji:"🗺️",min:2,time:30,place:"outdoor",material:"paper",desc:"Create clues that lead your family to a small hidden treasure."},
+{name:"Word Association",emoji:"💭",min:2,time:10,place:"any",material:"none",desc:"Say a word connected to the previous word. Keep going without repeating."},
+{name:"Build a Tower",emoji:"🏗️",min:2,time:20,place:"indoor",material:"any",desc:"Work together to build the tallest stable tower using safe household objects."},
+{name:"Would You Rather?",emoji:"🤔",min:2,time:10,place:"any",material:"none",desc:"Take turns choosing between two funny options and explaining why."},
+{name:"Nature Bingo",emoji:"🌳",min:2,time:30,place:"outdoor",material:"paper",desc:"Make a checklist of leaves, birds, clouds, and other things to spot outside."},
+{name:"Puzzle Partners",emoji:"🧩",min:2,time:30,place:"indoor",material:"cards",desc:"Solve a puzzle together and celebrate each small success."},
+{name:"Freeze Dance",emoji:"💃",min:3,time:10,place:"any",material:"none",desc:"Dance while music plays and freeze when it stops. Play safely with enough space."},
+{name:"Kindness Challenge",emoji:"💗",min:2,time:20,place:"any",material:"none",desc:"Each person suggests one thoughtful thing the family can do for someone today."}
+];
+let favourites=JSON.parse(localStorage.getItem("familyplay-favs")||"[]");
+let current=games;
+
+function render(list){
+const results=document.getElementById("results");
+results.innerHTML="";
+if(!list.length){results.innerHTML="<p>No matching games yet. Try changing your filters!</p>";return}
+list.forEach(g=>{
+const saved=favourites.includes(g.name);
+const card=document.createElement("article");
+card.className="game";
+card.innerHTML=`<div class="emoji">${g.emoji}</div><h3>${g.name}</h3><p>⏱ ${g.time} min · 👥 ${g.min}+ players</p><p>${g.desc}</p><button class="secondary">${saved?"★ Saved":"☆ Add to favourites"}</button>`;
+card.querySelector("button").onclick=()=>toggleFav(g.name);
+results.appendChild(card);
+});
+}
+function recommend(){
+const p=Number(document.getElementById("players").value);
+const t=Number(document.getElementById("time").value);
+const place=document.getElementById("place").value;
+const material=document.getElementById("materials").value;
+current=games.filter(g=>g.min<=p&&g.time<=t&&
+(place==="any"||g.place==="any"||g.place===place)&&
+(material==="any"||g.material==="any"||g.material===material||(material==="paper"&&g.material==="paper")));
+document.getElementById("heading").textContent="Your family game matches";
+render(current);
+}
+function surprise(){
+recommend();
+if(current.length){
+const g=current[Math.floor(Math.random()*current.length)];
+document.getElementById("heading").textContent="✨ Surprise pick: "+g.name;
+render([g]);
+}
+}
+function toggleFav(name){
+favourites=favourites.includes(name)?favourites.filter(x=>x!==name):[...favourites,name];
+localStorage.setItem("familyplay-favs",JSON.stringify(favourites));
+document.getElementById("favCount").textContent=favourites.length;
+render(current);
+}
+function showGames(){
+current=games;
+document.getElementById("heading").textContent="All family games";
+render(games);
+}
+function showFavourites(){
+current=games.filter(g=>favourites.includes(g.name));
+document.getElementById("heading").textContent="Your favourite games";
+render(current);
+}
+document.getElementById("favCount").textContent=favourites.length;
+showGames();
+</script>
+</body>
+</html>
